@@ -7,7 +7,7 @@ cols = 10
 rows = 22
 maxfps = 30
 
-
+# factory pattern
 class ColorFactory:
     colors = [
         (0, 0, 0),
