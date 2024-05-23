@@ -7,47 +7,55 @@ cols = 10
 rows = 22
 maxfps = 30
 
-colors = [
-    (0, 0, 0),
-    (255, 85, 85),
-    (100, 200, 115),
-    (120, 108, 245),
-    (255, 140, 50),
-    (50, 120, 52),
-    (146, 202, 73),
-    (150, 161, 218),
-    (35, 35, 35)
-]
+class ColorFactory:
+    colors = [
+        (0, 0, 0),
+        (255, 85, 85),
+        (100, 200, 115),
+        (120, 108, 245),
+        (255, 140, 50),
+        (50, 120, 52),
+        (146, 202, 73),
+        (150, 161, 218),
+        (35, 35, 35)
+    ]
 
-tetris_shapes = [
-    [[1, 1, 1],
-     [0, 1, 0]],
+    @staticmethod
+    def get_color(index):
+        return ColorFactory.colors[index]
 
-    [[0, 2, 2],
-     [2, 2, 0]],
+class ShapeFactory:
+    tetris_shapes = [
+        [[1, 1, 1],
+         [0, 1, 0]],
 
-    [[3, 3, 0],
-     [0, 3, 3]],
+        [[0, 2, 2],
+         [2, 2, 0]],
 
-    [[4, 0, 0],
-     [4, 4, 4]],
+        [[3, 3, 0],
+         [0, 3, 3]],
 
-    [[0, 0, 5],
-     [5, 5, 5]],
+        [[4, 0, 0],
+         [4, 4, 4]],
 
-    [[6, 6, 6, 6]],
+        [[0, 0, 5],
+         [5, 5, 5]],
 
-    [[7, 7],
-     [7, 7]]
-]
+        [[6, 6, 6, 6]],
 
+        [[7, 7],
+         [7, 7]]
+    ]
+
+    @staticmethod
+    def create_shape():
+        return ShapeFactory.tetris_shapes[rand(len(ShapeFactory.tetris_shapes))]
 
 def rotate_clockwise(shape):
     return [
         [shape[y][x] for y in range(len(shape))]
         for x in range(len(shape[0]) - 1, -1, -1)
     ]
-
 
 def check_collision(board, shape, offset):
     off_x, off_y = offset
@@ -60,11 +68,9 @@ def check_collision(board, shape, offset):
                 return True
     return False
 
-
 def remove_row(board, row):
     del board[row]
     return [[0 for i in range(cols)]] + board
-
 
 def join_matrixes(mat1, mat2, mat2_off):
     off_x, off_y = mat2_off
@@ -73,7 +79,6 @@ def join_matrixes(mat1, mat2, mat2_off):
             mat1[cy + off_y - 1][cx + off_x] += val
     return mat1
 
-
 def new_board():
     board = [
         [0 for x in range(cols)]
@@ -81,7 +86,6 @@ def new_board():
     ]
     board += [[1 for x in range(cols)]]
     return board
-
 
 class TetrisApp(object):
     def __init__(self):
@@ -96,12 +100,12 @@ class TetrisApp(object):
 
         self.screen = pygame.display.set_mode((self.width, self.height))
         pygame.event.set_blocked(pygame.MOUSEMOTION)
-        self.next_stone = tetris_shapes[rand(len(tetris_shapes))]
+        self.next_stone = ShapeFactory.create_shape()
         self.init_game()
 
     def new_stone(self):
         self.stone = self.next_stone[:]
-        self.next_stone = tetris_shapes[rand(len(tetris_shapes))]
+        self.next_stone = ShapeFactory.create_shape()
         self.stone_x = int(cols / 2 - len(self.stone[0]) / 2)
         self.stone_y = 0
 
@@ -150,7 +154,7 @@ class TetrisApp(object):
                 if val:
                     pygame.draw.rect(
                         self.screen,
-                        colors[val],
+                        ColorFactory.get_color(val),
                         pygame.Rect(
                             (off_x + x) *
                             cell_size,
@@ -263,16 +267,12 @@ class TetrisApp(object):
                                      (self.rlim + 1, 0),
                                      (self.rlim + 1, self.height - 1))
                     self.disp_msg("Next:", (self.rlim + cell_size, 2))
-                    self.disp_msg("Score: %d\n\nLevel: %d\
-                    \nLines: %d" % (self.score, self.level, self.lines),
-                                  (self.rlim + cell_size, cell_size * 5))
+                    self.disp_msg("Score: %d\n\nLevel: %d\nLines: %d" % (self.score, self.level, self.lines))
                     self.draw_matrix(self.bground_grid, (0, 0))
                     self.draw_matrix(self.board, (0, 0))
-                    self.draw_matrix(self.stone,
-                                     (self.stone_x, self.stone_y))
-                    self.draw_matrix(self.next_stone,
-                                     (cols + 1, 2))
-                    pygame.display.update()
+                    self.draw_matrix(self.stone, (self.stone_x, self.stone_y))
+                    self.draw_matrix(self.next_stone, (cols + 1, 2))
+            pygame.display.update()
 
             for event in pygame.event.get():
                 if event.type == pygame.USEREVENT + 1:
@@ -286,9 +286,6 @@ class TetrisApp(object):
 
             dont_burn_my_cpu.tick(maxfps)
 
-
 if __name__ == '__main__':
     App = TetrisApp()
     App.run()
-
-// aa
