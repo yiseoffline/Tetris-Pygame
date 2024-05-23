@@ -7,39 +7,51 @@ cols = 10
 rows = 22
 maxfps = 30
 
-colors = [
-    (0, 0, 0),
-    (255, 85, 85),
-    (100, 200, 115),
-    (120, 108, 245),
-    (255, 140, 50),
-    (50, 120, 52),
-    (146, 202, 73),
-    (150, 161, 218),
-    (35, 35, 35)
-]
 
-tetris_shapes = [
-    [[1, 1, 1],
-     [0, 1, 0]],
+class ColorFactory:
+    colors = [
+        (0, 0, 0),
+        (255, 85, 85),
+        (100, 200, 115),
+        (120, 108, 245),
+        (255, 140, 50),
+        (50, 120, 52),
+        (146, 202, 73),
+        (150, 161, 218),
+        (35, 35, 35)
+    ]
 
-    [[0, 2, 2],
-     [2, 2, 0]],
+    @staticmethod
+    def get_color(index):
+        return ColorFactory.colors[index]
 
-    [[3, 3, 0],
-     [0, 3, 3]],
+class ShapeFactory:
+    tetris_shapes = [
+        [[1, 1, 1],
+         [0, 1, 0]],
 
-    [[4, 0, 0],
-     [4, 4, 4]],
+        [[0, 2, 2],
+         [2, 2, 0]],
 
-    [[0, 0, 5],
-     [5, 5, 5]],
+        [[3, 3, 0],
+         [0, 3, 3]],
 
-    [[6, 6, 6, 6]],
+        [[4, 0, 0],
+         [4, 4, 4]],
 
-    [[7, 7],
-     [7, 7]]
-]
+        [[0, 0, 5],
+         [5, 5, 5]],
+
+        [[6, 6, 6, 6]],
+
+        [[7, 7],
+         [7, 7]]
+    ]
+
+    @staticmethod
+    def create_shape():
+        return ShapeFactory.tetris_shapes[rand(len(ShapeFactory.tetris_shapes))]
+
 
 def rotate_clockwise(shape):
     return [
@@ -80,6 +92,7 @@ def new_board():
 class TetrisApp:
     _instance = None
 
+    # singleton pattern (단일 인스턴스 보장)
     def __new__(cls, *args, **kwargs):
         if not cls._instance:
             cls._instance = super(TetrisApp, cls).__new__(cls, *args, **kwargs)
@@ -97,14 +110,14 @@ class TetrisApp:
         self.default_font = pygame.font.Font(pygame.font.get_default_font(), 12)
         self.screen = pygame.display.set_mode((self.width, self.height))
         pygame.event.set_blocked(pygame.MOUSEMOTION)
-        self.next_stone = tetris_shapes[rand(len(tetris_shapes))]
+        self.next_stone = ShapeFactory.create_shape()
         self.state = None
         self.initialized = True
         self.init_game()
 
     def new_stone(self):
         self.stone = self.next_stone[:]
-        self.next_stone = tetris_shapes[rand(len(tetris_shapes))]
+        self.next_stone = ShapeFactory.create_shape()
         self.stone_x = int(cols / 2 - len(self.stone[0]) / 2)
         self.stone_y = 0
         if check_collision(self.board, self.stone, (self.stone_x, self.stone_y)):
@@ -148,7 +161,7 @@ class TetrisApp:
                 if val:
                     pygame.draw.rect(
                         self.screen,
-                        colors[val],
+                        ColorFactory.get_color(val),
                         pygame.Rect(
                             (off_x + x) * cell_size,
                             (off_y + y) * cell_size,
@@ -230,6 +243,7 @@ class TetrisApp:
             self.init_game()
             self.state.gameover = False
 
+# state pattern (게임 진행 중 일 때의 상태 관리)
 class GameState:
     def __init__(self, app):
         self.app = app
@@ -242,7 +256,8 @@ class GameState:
 
     def handle_event(self, event):
         pass
-
+        
+# state pattern
 class PlayingState(GameState):
     def __init__(self, app):
         super().__init__(app)
@@ -282,6 +297,7 @@ class PlayingState(GameState):
             if event.key == pygame.K_SPACE:
                 self.app.insta_drop()
 
+# state pattern (게임이 종료되었을 때의 상태 관리)
 class GameOverState(GameState):
     def update(self):
         pass
