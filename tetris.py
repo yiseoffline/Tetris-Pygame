@@ -80,6 +80,7 @@ def new_board():
 class TetrisApp:
     _instance = None
 
+    # singleton pattern (단일 인스턴스 보장)
     def __new__(cls, *args, **kwargs):
         if not cls._instance:
             cls._instance = super(TetrisApp, cls).__new__(cls, *args, **kwargs)
@@ -230,6 +231,7 @@ class TetrisApp:
             self.init_game()
             self.state.gameover = False
 
+# state pattern (게임 진행 중 일 때의 상태 관리)
 class GameState:
     def __init__(self, app):
         self.app = app
@@ -242,7 +244,8 @@ class GameState:
 
     def handle_event(self, event):
         pass
-
+        
+# state pattern
 class PlayingState(GameState):
     def __init__(self, app):
         super().__init__(app)
@@ -282,6 +285,7 @@ class PlayingState(GameState):
             if event.key == pygame.K_SPACE:
                 self.app.insta_drop()
 
+# state pattern (게임이 종료되었을 때의 상태 관리)
 class GameOverState(GameState):
     def update(self):
         pass
